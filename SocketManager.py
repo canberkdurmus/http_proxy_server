@@ -1,10 +1,10 @@
 import os
 import socket
 import threading
-from BrowserRequest import BrowserRequest
+from Request import Request
 
 
-class ServerSocket:
+class SocketManager:
     STATUSES = {
         200: 'OK',
         400: 'Bad Request',
@@ -79,8 +79,8 @@ class ServerSocket:
 
     def response(self, connection):
         data = connection.recv(self.buffer_size)
-        request = BrowserRequest(data)
-        body, status_code = self.load_file(request)
+        request = Request(data)
+        body, status_code = self.generate_response(request)
         header = self.get_header(status_code, request.path)
         self.respond((header + body).encode(), connection)
         self.handled += 1
@@ -97,7 +97,7 @@ class ServerSocket:
             "\n\n"
         ])
 
-    def load_file(self, request):
+    def generate_response(self, request):
         if request.method != 'GET':
             if request.method in self.VALID_METHODS:
                 # Request method is valid but not get -> 501 Not Implemented

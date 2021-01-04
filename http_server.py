@@ -1,11 +1,11 @@
 import os
 import argparse
-from ServerSocket import ServerSocket
+from SocketManager import SocketManager
 
 
 class Server:
     def __init__(self, port=80, homedir=os.path.curdir):
-        self.socket = ServerSocket(port=port)
+        self.socket = SocketManager(port=port)
         self.homedir = os.path.abspath(homedir)
 
     def serve(self):

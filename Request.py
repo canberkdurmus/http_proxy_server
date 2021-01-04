@@ -1,4 +1,4 @@
-class BrowserRequest:
+class Request:
 
     def __init__(self, data: bytes):
         lines = [d.strip() for d in data.decode().split("\n") if d.strip()]
