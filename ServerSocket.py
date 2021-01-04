@@ -57,7 +57,6 @@ class ServerSocket:
 
         while True:
             connection, _ = self._socket.accept()
-            print("xd")
             threading.Thread(target=self.response, args=(connection,)).start()
 
     def response(self, connection):
@@ -73,7 +72,7 @@ class ServerSocket:
         header = self.get_header(status_code, path)
         self.respond((header + body).encode(), connection)
         self.handled += 1
-        print(self.handled)
+        # print(self.handled)
         self.log(self.log_format.format(status_code=status_code, method=request.method, path=request.path,
                                         user_agent=request.user_agent))
         return
