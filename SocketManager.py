@@ -81,18 +81,19 @@ class SocketManager:
         data = connection.recv(self.buffer_size)
         request = Request(data)
         body, status_code = self.generate_response(request)
-        header = self.get_header(status_code, request.path)
+        header = self.get_header(status_code, request.path, request.path)
         self.respond((header + body).encode(), connection)
         self.handled += 1
         # print(self.handled)
         self.log(self.log_format.format(status_code=status_code, method=request.method, path=request.path))
         return
 
-    def get_header(self, status_code: int, path: str):
+    def get_header(self, status_code: int, path: str, content_length):
         _, file_ext = os.path.splitext(path)
         return "\n".join([
             "HTTP/1.1 {} {}".format(status_code, self.STATUSES[status_code]),
             "Content-Type: text/html; charset=UTF-8",
+            "Content-Length: " + content_length,
             "Server: CSE4074 HTTP Server"
             "\n\n"
         ])
