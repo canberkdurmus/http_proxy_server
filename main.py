@@ -110,8 +110,7 @@ class SimpleServer:
 
     def serve(self):
         self.socket.open()
-        self.log('Opening socket connection {}:{} in {}'.format(
-            self.socket.host, self.socket.port, self.homedir))
+        self.log('Opening socket connection {}:{} in {}'.format(self.socket.host, self.socket.port, self.homedir))
         while True:
             self.serve_request()
 
