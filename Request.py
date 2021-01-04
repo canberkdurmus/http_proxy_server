@@ -1,6 +1,7 @@
 class Request:
 
     def __init__(self, data: bytes):
+        print("RECEIVED: ", data)
         lines = [d.strip() for d in data.decode().split("\n") if d.strip()]
 
         # First line takes the form of
