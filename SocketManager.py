@@ -85,7 +85,7 @@ class SocketManager:
         self.respond((header + body).encode(), connection)
         self.handled += 1
         # print(self.handled)
-        self.log(self.log_format.format(status_code=status_code, method=request.method, path=request.path))
+        # self.log(status_code, request.method, request.path)
         return
 
     def get_header(self, status_code: int, path: str, content_length):
@@ -108,12 +108,12 @@ class SocketManager:
                 return self.response_400, 400
 
         try:
-            path = int(request.path)
+            length = int(request.path)
             # Path is greater than 20000 -> 400 Bad Request
-            if path > 20000:
+            if length > 20000:
                 return self.response_400_high, 400
             # Path is less than 1500 -> 400 Bad Request
-            elif path < 1500:
+            elif length < 1500:
                 return self.response_400_low, 400
         # Path is not an int -> 400 Bad Request
         except ValueError as e:
@@ -123,15 +123,23 @@ class SocketManager:
             # with open(os.path.join(self.homedir, request.path)) as f:
             # return f.read(), 200
             # TODO: generate file with corresponding size and return the file with code 200
-            return self.response_200, 200
+
+            current_len = 22
+            generated = '<html><h1>'  # len = 10
+            while current_len < length:
+                generated += 'a'
+                current_len += 1
+            generated += '</h1></html>'  # len = 12
+
+            return generated, 200
         except FileNotFoundError:
             return self.response_404, 404
 
     def respond(self, data: bytes, connection):
         assert self._socket is not None, "Server Socket must be open to respond"
+        print("SENT: ", data)
         connection.send(data)
         connection.close()
 
-    @staticmethod
-    def log(msg: str):
-        print(msg)
+    def log(self, status_code, method, path):
+        print(self.log_format.format(status_code=str(status_code), method=str(method), path=str(path)))
