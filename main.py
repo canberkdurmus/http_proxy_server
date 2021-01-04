@@ -14,8 +14,8 @@ class BrowserRequest:
         self.info = {k: v for k, v in (line.split(': ') for line in lines)}
 
     def __repr__(self) -> str:
-        return "<BrowserRequest {method} {path} {http_version}>".format(
-            method=self.method, path=self.path, http_version=self.http_version)
+        return "<BrowserRequest {method} {path} {http_version}>".format(method=self.method, path=self.path,
+                                                                        http_version=self.http_version)
 
     def __getattr__(self, name: str):
         try:
@@ -37,8 +37,7 @@ class ServerSocket:
 
     def __repr__(self) -> str:
         status = 'closed' if self._socket is None else 'open'
-        return "<{status} ServerSocket {host}:{port}>".format(
-            status=status, host=self.host, port=self.port)
+        return "<{status} ServerSocket {host}:{port}>".format(status=status, host=self.host, port=self.port)
 
     def __enter__(self):
         self.open()
@@ -81,7 +80,6 @@ class ServerSocket:
 
 
 class SimpleServer:
-    """A Simple webserver implemented in Python. NOT FOR PRODUCTION USE"""
 
     STATUSES = {
         200: 'Ok',
