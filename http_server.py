@@ -24,7 +24,6 @@ class SimpleServer:
         self.socket.log('Opening socket conn {}:{} in {}'.format(self.socket.host, self.socket.port, self.homedir))
         self.socket.listen()
 
-
     def stop(self):
         self.socket.close()
 
