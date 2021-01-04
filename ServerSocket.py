@@ -1,4 +1,3 @@
-import mimetypes
 import os
 import socket
 import threading
@@ -6,13 +5,31 @@ from BrowserRequest import BrowserRequest
 
 
 class ServerSocket:
-    """Simplified interface for interacting with a web server socket"""
     STATUSES = {
-        200: 'Ok',
-        404: 'File not found',
+        200: 'OK',
+        400: 'Bad Request',
+        404: 'Not Found',
+        501: 'Not Implemented',
     }
-    log_format = "{status_code} - {method} {path} {user_agent}"
-    response_404 = '<html><h1>404 File Not Found</h1></html>'
+    # All valid HTTP request methods except 'GET'
+    VALID_METHODS = [
+        'HEAD',
+        'POST',
+        'PUT',
+        'DELETE',
+        'CONNECT',
+        'OPTIONS',
+        'TRACE',
+        'PATCH'
+    ]
+    log_format = "{status_code} - {method} {path}"
+    response_200 = '<html><h1>200 OK</h1></html>'
+    response_400 = '<html><h1>400 Bad Request</h1></html>'
+    response_400_not_int = '<html><h1>400 Bad Request - URI is not integer</h1></html>'
+    response_400_low = '<html><h1>400 Bad Request - URI is less than 1.500</h1></html>'
+    response_400_high = '<html><h1>400 Bad Request - URI is greater than 20.000</h1></html>'
+    response_404 = '<html><h1>404 Not Found</h1></html>'
+    response_501 = '<html><h1>501 Not Implemented</h1></html>'
 
     def __init__(self, host='', port=80, buffer_size=1024, max_queued_connections=5):
         self._socket = None
@@ -57,39 +74,55 @@ class ServerSocket:
 
         while True:
             connection, _ = self._socket.accept()
-            threading.Thread(target=self.response, args=(connection,)).start()
+            t = threading.Thread(target=self.response, args=(connection,))
+            t.start()
 
     def response(self, connection):
         data = connection.recv(self.buffer_size)
         request = BrowserRequest(data)
-        path = request.path
-        try:
-            body, status_code = self.load_file(path)
-        except IsADirectoryError:
-            path = os.path.join(path, 'index.html')
-            body, status_code = self.load_file(path)
-
-        header = self.get_header(status_code, path)
+        body, status_code = self.load_file(request)
+        header = self.get_header(status_code, request.path)
         self.respond((header + body).encode(), connection)
         self.handled += 1
         # print(self.handled)
-        self.log(self.log_format.format(status_code=status_code, method=request.method, path=request.path,
-                                        user_agent=request.user_agent))
+        self.log(self.log_format.format(status_code=status_code, method=request.method, path=request.path))
         return
 
     def get_header(self, status_code: int, path: str):
         _, file_ext = os.path.splitext(path)
         return "\n".join([
             "HTTP/1.1 {} {}".format(status_code, self.STATUSES[status_code]),
-            "Content-Type: {}".format(mimetypes.types_map.get(file_ext, 'application/octet-stream')),
-            "Server: SimplePython Server"
+            "Content-Type: text/html; charset=UTF-8",
+            "Server: CSE4074 HTTP Server"
             "\n\n"
         ])
 
-    def load_file(self, path):
+    def load_file(self, request):
+        if request.method != 'GET':
+            if request.method in self.VALID_METHODS:
+                # Request method is valid but not get -> 501 Not Implemented
+                return self.response_501, 501
+            else:
+                # Request method is invalid -> 400 Bad Request
+                return self.response_400, 400
+
         try:
-            with open(os.path.join(self.homedir, path.lstrip('/'))) as f:
-                return f.read(), 200
+            path = int(request.path)
+            # Path is greater than 20000 -> 400 Bad Request
+            if path > 20000:
+                return self.response_400_high, 400
+            # Path is less than 1500 -> 400 Bad Request
+            elif path < 1500:
+                return self.response_400_low, 400
+        # Path is not an int -> 400 Bad Request
+        except ValueError as e:
+            return self.response_400_not_int, 400
+
+        try:
+            # with open(os.path.join(self.homedir, request.path)) as f:
+            # return f.read(), 200
+            # TODO: generate file with corresponding size and return the file with code 200
+            return self.response_200, 200
         except FileNotFoundError:
             return self.response_404, 404
 
