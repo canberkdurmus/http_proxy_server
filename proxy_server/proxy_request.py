@@ -7,6 +7,7 @@ class ProxyRequest:
         self.method, self.full_path, self.http_version = lines.pop(0).split(" ")
         self.error_message = None
         self.invalid_request = False
+        self.conditional_get = False
         self.host, self.port, self.relative = self.parse_url()
         self.http_request = str.replace(self.decoded_data, self.full_path, self.relative, 1).encode('utf-8')
 
@@ -34,10 +35,14 @@ class ProxyRequest:
                 self.invalid_request = True
                 return '', '', '/'
 
-
-
             return domain, port, relative
         else:
             self.error_message = 'Invalid HTTP Method'
             self.invalid_request = True
             return '', '', '/'
+
+    def check_conditional(self):
+        if 'If-Match' in self.decoded_data or "If-None-Match" in self.decoded_data or \
+                'If-Modified-Since' in self.decoded_data or 'If-Unmodified-Since' in self.decoded_data \
+                or 'If-Range' in self.decoded_data:
+            self.conditional_get = True
