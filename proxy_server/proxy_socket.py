@@ -30,6 +30,7 @@ class proxy_socket:
     response_404_error = '<html><h1>404 Not Found - {error}</h1></html>'
     response_414 = '<html><h1>414 URI Too Long</h1></html>'
     response_501 = '<html><h1>501 Not Implemented</h1></html>'
+    cache = {}
 
     def __init__(self, host='', port=80, buffer_size=1024, max_queued_connections=5):
         self._socket = None
@@ -103,6 +104,11 @@ class proxy_socket:
         except ValueError:
             pass
 
+        get_cache = self.get_cache(int(request.relative.strip('/')))
+        if get_cache is not None:
+            print("CACHE: ", get_cache)
+            return get_cache
+
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
@@ -116,6 +122,9 @@ class proxy_socket:
         client.close()
         print('TO SERVER: \n', request.http_request.decode('utf-8'))
         print("FROM SERVER: ", from_server.decode('utf-8'))
+
+        self.add_cache(int(request.relative.strip('/')), from_server)
+
         return from_server
 
     def respond(self, data: bytes, connection):
@@ -123,3 +132,12 @@ class proxy_socket:
         print('TO CLIENT: \n', data.decode('utf-8'))
         connection.send(data)
         connection.close()
+
+    def add_cache(self, req, res):
+        self.cache[req] = res
+
+    def get_cache(self, req):
+        if req in self.cache:
+            return self.cache[req]
+        else:
+            return None
