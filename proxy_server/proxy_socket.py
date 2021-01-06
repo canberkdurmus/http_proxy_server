@@ -7,6 +7,7 @@ from proxy_request import ProxyRequest
 class proxy_socket:
     STATUSES = {
         200: 'OK',
+        304: 'Not Modified',
         400: 'Bad Request',
         404: 'Not Found',
         414: 'URI Too Long',
@@ -25,6 +26,7 @@ class proxy_socket:
     ]
     log_format = "{status_code} - {method} {path}"
     response_200 = '<html><h1>200 OK</h1></html>'
+    response_304 = ''
     response_400 = '<html><h1>400 Bad Request</h1></html>'
     response_404 = '<html><h1>404 Not Found</h1></html>'
     response_404_error = '<html><h1>404 Not Found - {error}</h1></html>'
@@ -98,32 +100,37 @@ class proxy_socket:
             return (header + self.response_404_error.format(error=request.error_message)).encode('utf-8')
 
         try:
-            if int(request.relative.strip('/')) > 9999:
-                header = self.get_header(414, request.full_path, request.full_path)
-                return (header + self.response_414).encode('utf-8')
+            req_length_path = int(request.relative.strip('/'))
         except ValueError:
-            pass
+            header = self.get_header(404, request.full_path, request.full_path)
+            return (header + self.response_404_error.format(error='Path is not an integer')).encode('utf-8')
 
-        get_cache = self.get_cache(int(request.relative.strip('/')))
+        if req_length_path > 9999:
+            header = self.get_header(414, request.full_path, request.full_path)
+            return (header + self.response_414).encode('utf-8')
+
+        if request.conditional_get and req_length_path % 2 == 0:
+            header = self.get_header(304, request.full_path, request.full_path)
+            return (header + self.response_304).encode('utf-8')
+
+        get_cache = self.get_cache(req_length_path)
         if get_cache is not None:
             print("CACHE: ", get_cache)
             return get_cache
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         try:
             client.connect((request.host, request.port))
         except ConnectionError:
             header = self.get_header(404, request.full_path, request.full_path)
             return (header + self.response_404).encode('utf-8')
-
         client.send(request.http_request)
         from_server = client.recv(1024)
         client.close()
         print('TO SERVER: \n', request.http_request.decode('utf-8'))
         print("FROM SERVER: ", from_server.decode('utf-8'))
 
-        self.add_cache(int(request.relative.strip('/')), from_server)
+        self.add_cache(req_length_path, from_server)
 
         return from_server
 
