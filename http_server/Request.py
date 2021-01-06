@@ -13,4 +13,3 @@ class Request:
     def __repr__(self) -> str:
         return "<BrowserRequest {method} {path} {http_version}>".format(method=self.method, path=self.path,
                                                                         http_version=self.http_version)
-

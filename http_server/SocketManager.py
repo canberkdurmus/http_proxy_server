@@ -116,20 +116,16 @@ class SocketManager:
             elif length < 1500:
                 return self.response_400_low, 400
         # Path is not an int -> 400 Bad Request
-        except ValueError as e:
+        except ValueError:
             return self.response_400_not_int, 400
 
         try:
-            # with open(os.path.join(self.homedir, request.path)) as f:
-            # return f.read(), 200
-            # TODO: generate file with corresponding size and return the file with code 200
-
-            current_len = 22
-            generated = '<html><h1>'  # len = 10
+            current_len = 13
+            generated = '<html>'  # len = 6
             while current_len < length:
                 generated += 'a'
                 current_len += 1
-            generated += '</h1></html>'  # len = 12
+            generated += '</html>'  # len = 7
 
             return generated, 200
         except FileNotFoundError:
