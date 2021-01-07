@@ -26,7 +26,7 @@ class SocketManager:
     response_200 = '<html><h1>200 OK</h1></html>'
     response_400 = '<html><h1>400 Bad Request</h1></html>'
     response_400_not_int = '<html><h1>400 Bad Request - URI is not integer</h1></html>'
-    response_400_low = '<html><h1>400 Bad Request - URI is less than 1.500</h1></html>'
+    response_400_low = '<html><h1>400 Bad Request - URI is less than 100</h1></html>'
     response_400_high = '<html><h1>400 Bad Request - URI is greater than 20.000</h1></html>'
     response_404 = '<html><h1>404 Not Found</h1></html>'
     response_501 = '<html><h1>501 Not Implemented</h1></html>'
@@ -112,8 +112,8 @@ class SocketManager:
             # Path is greater than 20000 -> 400 Bad Request
             if length > 20000:
                 return self.response_400_high, 400
-            # Path is less than 1500 -> 400 Bad Request
-            elif length < 1500:
+            # Path is less than 100 -> 400 Bad Request
+            elif length < 100:
                 return self.response_400_low, 400
         # Path is not an int -> 400 Bad Request
         except ValueError:
