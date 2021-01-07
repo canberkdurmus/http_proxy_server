@@ -125,7 +125,7 @@ class proxy_socket:
             header = self.get_header(404, request.full_path, request.full_path)
             return (header + self.response_404).encode('utf-8')
         client.send(request.http_request)
-        from_server = client.recv(1024)
+        from_server = client.recv(10240)
         client.close()
         print('TO SERVER: \n', request.http_request.decode('utf-8'))
         print("FROM SERVER: ", from_server.decode('utf-8'))
