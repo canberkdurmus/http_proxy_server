@@ -127,7 +127,7 @@ class SocketManager:
 
     def respond(self, data: bytes, connection):
         assert self._socket is not None, "Server Socket must be open to respond"
-        print("SENT: ", data)
+        print("\nSENT: ", data)
         connection.send(data)
         connection.close()
 

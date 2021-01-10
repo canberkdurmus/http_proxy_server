@@ -1,7 +1,7 @@
 class Request:
 
     def __init__(self, data: bytes):
-        print("RECEIVED: ", data)
+        print("\nRECEIVED: ", data)
         lines = [d.strip() for d in data.decode().split("\n") if d.strip()]
 
         self.method, self.path, self.http_version = lines.pop(0).split(" ")
