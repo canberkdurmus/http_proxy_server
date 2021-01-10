@@ -5,12 +5,6 @@ from Request import Request
 
 
 class SocketManager:
-    STATUSES = {
-        200: 'OK',
-        400: 'Bad Request',
-        404: 'Not Found',
-        501: 'Not Implemented',
-    }
     # All valid HTTP request methods except 'GET'
     VALID_METHODS = [
         'HEAD',
@@ -22,6 +16,12 @@ class SocketManager:
         'TRACE',
         'PATCH'
     ]
+    STATUSES = {
+        200: 'OK',
+        400: 'Bad Request',
+        404: 'Not Found',
+        501: 'Not Implemented',
+    }
     log_format = "{status_code} - {method} {path}"
     response_200 = '<html><h1>200 OK</h1></html>'
     response_400 = '<html><h1>400 Bad Request</h1></html>'
@@ -81,19 +81,16 @@ class SocketManager:
         data = connection.recv(self.buffer_size)
         request = Request(data)
         body, status_code = self.generate_response(request)
-        header = self.get_header(status_code, request.path, request.path)
-        self.respond((header + body).encode(), connection)
-        self.handled += 1
-        # print(self.handled)
-        # self.log(status_code, request.method, request.path)
+        header = self.get_header(status_code, request.path)
+        self.respond((header + body).encode('utf-8'), connection)
         return
 
-    def get_header(self, status_code: int, path: str, content_length):
+    def get_header(self, status_code: int, path: str):
         _, file_ext = os.path.splitext(path)
         return "\n".join([
             "HTTP/1.1 {} {}".format(status_code, self.STATUSES[status_code]),
             "Content-Type: text/html; charset=UTF-8",
-            "Content-Length: " + content_length,
+            "Content-Length: " + path,
             "Server: CSE4074 HTTP Server"
             "\n\n"
         ])
@@ -119,17 +116,14 @@ class SocketManager:
         except ValueError:
             return self.response_400_not_int, 400
 
-        try:
-            current_len = 13
-            generated = '<html>'  # len = 6
-            while current_len < length:
-                generated += 'a'
-                current_len += 1
-            generated += '</html>'  # len = 7
+        current_len = 13
+        generated = '<html>'  # len = 6
+        while current_len < length:
+            generated += 'a'
+            current_len += 1
+        generated += '</html>'  # len = 7
 
-            return generated, 200
-        except FileNotFoundError:
-            return self.response_404, 404
+        return generated, 200
 
     def respond(self, data: bytes, connection):
         assert self._socket is not None, "Server Socket must be open to respond"
