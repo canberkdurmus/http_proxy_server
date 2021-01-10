@@ -54,14 +54,13 @@ class SocketManager:
     def open(self):
         assert self._socket is None, "ServerSocket is already open"
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             self._socket.bind((self.host, self.port))
         except Exception as e:
             print(e)
             self.close()
             raise
-        else:
-            self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     def close(self):
         assert self._socket is not None, "Server Socket is already closed"
