@@ -3,7 +3,7 @@ import argparse
 from proxy_socket import proxy_socket
 
 
-class Server:
+class ProxyServer:
     def __init__(self, port=80, homedir=os.path.curdir):
         self.socket = proxy_socket(port=port)
         self.homedir = os.path.abspath(homedir)
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     parser.add_argument('port', type=int)
     args = parser.parse_args()
 
-    server = Server(args.port)
+    server = ProxyServer(args.port)
     try:
         server.serve()
     finally:
