@@ -1,6 +1,5 @@
 ﻿# HTTP Server & Proxy Server
 
-**150115037 - Can Berk Durmuş      150117069 - Elif Balcı**
 
 ## Overview
 
@@ -24,7 +23,9 @@ For the implementations of the HTTP server and proxy server, Python 3 programmin
 
 After the creation of the Request object, it is sent to the ‘generate\_response’ method, obviously this is the method which generates the response as html file, error or any legal response type. The method returns a body and status code. See below:
 
-![](./img/Report.009.png)generate\_response method basically checks for any erroneous status for request and generates the response accordingly. In the first step it checks if the HTTP Method is GET or not; if it is not, it checks the validity of the HTTP method. If it is valid but not GET returns ‘501 Not Implemented’ code with a small html string. If it is not GET and it is invalid it returns ‘400 Bad Request”
+![](./img/Report.009.png)
+
+generate\_response method basically checks for any erroneous status for request and generates the response accordingly. In the first step it checks if the HTTP Method is GET or not; if it is not, it checks the validity of the HTTP method. If it is valid but not GET returns ‘501 Not Implemented’ code with a small html string. If it is not GET and it is invalid it returns ‘400 Bad Request”
 
 In the next step the method tries to cast the request path to integer, if it gives an error the method returns a ‘400 Bad Request’ but with a different and explanatory error response page. If it is an integer but it is not between 100 and 20000, it returns the same error code with other explanatory error response pages.
 
