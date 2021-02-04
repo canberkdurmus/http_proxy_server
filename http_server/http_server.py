@@ -1,6 +1,6 @@
 import os
 import argparse
-from SocketManager import SocketManager
+from socket_manager import SocketManager
 
 
 class Server:

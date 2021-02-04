@@ -1,7 +1,7 @@
 import os
 import socket
 import threading
-from Request import Request
+from request import Request
 
 
 class SocketManager:
